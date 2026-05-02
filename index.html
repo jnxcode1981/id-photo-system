@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Auto ID Photo System</title>
+
+<style>
+body {
+    font-family: Arial;
+    text-align: center;
+    background: #f4f4f4;
+    padding: 30px;
+}
+
+.container {
+    background: white;
+    padding: 20px;
+    max-width: 500px;
+    margin: auto;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #ccc;
+}
+
+h2 {
+    color: #333;
+}
+
+input, select, button {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+}
+
+button {
+    background: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+#result {
+    margin-top: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>📸 Auto ID Photo System</h2>
+
+<!-- IMAGE UPLOAD -->
+<input type="file" id="imageInput" accept="image/*">
+
+<!-- PACKAGE SELECTION -->
+<select id="package">
+    <option value="pkg1">4 pcs 2x2 + 8 pcs 1x1</option>
+    <option value="pkg2">2 pcs 2x2 + 12 pcs 1x1</option>
+    <option value="pkg3">2 passport size + 4 pcs 1x1</option>
+    <option value="pkg4">4 pcs 2x2 only</option>
+    <option value="pkg5">3 passport size only</option>
+</select>
+
+<!-- ATTIRE OPTION -->
+<select id="attire">
+    <option value="none">No Change</option>
+    <option value="formal">Formal Attire</option>
+    <option value="uniform">Uniform</option>
+    <option value="casual">Casual</option>
+</select>
+
+<!-- PROCESS BUTTON -->
+<button onclick="uploadImage()">🚀 Process ID Photo</button>
+
+<div id="result"></div>
+
+</div>
+
+<script>
+
+// 🔥 CHANGE THIS AFTER DEPLOYING TO RENDER
+const API_URL = "https://YOUR-RENDER-APP.onrender.com/process";
+
+async function uploadImage() {
+
+    let fileInput = document.getElementById("imageInput");
+    let packageType = document.getElementById("package").value;
+    let attireType = document.getElementById("attire").value;
+    let resultDiv = document.getElementById("result");
+
+    if (!fileInput.files[0]) {
+        alert("Please select an image first!");
+        return;
+    }
+
+    let formData = new FormData();
+    formData.append("image", fileInput.files[0]);
+    formData.append("package", packageType);
+    formData.append("attire", attireType);
+
+    resultDiv.innerHTML = "Processing... ⏳";
+
+    try {
+        let response = await fetch(API_URL, {
+            method: "POST",
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error("Server error");
+        }
+
+        let blob = await response.blob();
+        let url = URL.createObjectURL(blob);
+
+        resultDiv.innerHTML = `
+            <h3>✅ Done!</h3>
+            <a href="${url}" download="id-photo.jpg">
+                Download Result
+            </a><br><br>
+            <img src="${url}" width="300">
+        `;
+
+    } catch (error) {
+        resultDiv.innerHTML = "❌ Error processing image";
+        console.log(error);
+    }
+}
+
+</script>
+
+</body>
+</html>
