@@ -1,0 +1,189 @@
+[1mdiff --git a/index.html b/index.html[m
+[1mindex 2ac2317..cd9847b 100644[m
+[1m--- a/index.html[m
+[1m+++ b/index.html[m
+[36m@@ -2,33 +2,38 @@[m
+ <html lang="en">[m
+ <head>[m
+ <meta charset="UTF-8">[m
+[32m+[m[32m<meta name="viewport" content="width=device-width, initial-scale=1.0">[m
+ <title>Auto ID Photo System</title>[m
+ [m
+ <style>[m
+ body {[m
+[31m-    font-family: Arial;[m
+[32m+[m[32m    font-family: Arial, sans-serif;[m
+     text-align: center;[m
+[31m-    background: #f4f4f4;[m
+[32m+[m[32m    background: linear-gradient(135deg, #f4f4f4, #e8f0ff);[m
+     padding: 30px;[m
+ }[m
+ [m
+ .container {[m
+[31m-    background: white;[m
+[31m-    padding: 20px;[m
+[31m-    max-width: 500px;[m
+[32m+[m[32m    background: #fff;[m
+[32m+[m[32m    padding: 25px;[m
+[32m+[m[32m    max-width: 520px;[m
+     margin: auto;[m
+[31m-    border-radius: 10px;[m
+[31m-    box-shadow: 0 0 10px #ccc;[m
+[32m+[m[32m    border-radius: 12px;[m
+[32m+[m[32m    box-shadow: 0 8px 20px rgba(0,0,0,0.1);[m
+ }[m
+ [m
+ h2 {[m
+     color: #333;[m
+[32m+[m[32m    margin-bottom: 15px;[m
+ }[m
+ [m
+ input, select, button {[m
+[31m-    width: 90%;[m
+[31m-    padding: 10px;[m
+[32m+[m[32m    width: 92%;[m
+[32m+[m[32m    padding: 12px;[m
+     margin: 10px 0;[m
+[32m+[m[32m    border-radius: 6px;[m
+[32m+[m[32m    border: 1px solid #ccc;[m
+[32m+[m[32m    font-size: 14px;[m
+ }[m
+ [m
+ button {[m
+[36m@@ -36,15 +41,38 @@[m [mbutton {[m
+     color: white;[m
+     border: none;[m
+     cursor: pointer;[m
+[32m+[m[32m    font-weight: bold;[m
+ }[m
+ [m
+ button:hover {[m
+     background: #0056b3;[m
+ }[m
+ [m
+[32m+[m[32mbutton:disabled {[m
+[32m+[m[32m    background: #999;[m
+[32m+[m[32m    cursor: not-allowed;[m
+[32m+[m[32m}[m
+[32m+[m
+ #result {[m
+     margin-top: 20px;[m
+ }[m
+[32m+[m
+[32m+[m[32mimg {[m
+[32m+[m[32m    margin-top: 10px;[m
+[32m+[m[32m    border-radius: 8px;[m
+[32m+[m[32m    max-width: 100%;[m
+[32m+[m[32m    border: 1px solid #ddd;[m
+[32m+[m[32m}[m
+[32m+[m
+[32m+[m[32m.download {[m
+[32m+[m[32m    display: inline-block;[m
+[32m+[m[32m    margin-top: 10px;[m
+[32m+[m[32m    padding: 10px 15px;[m
+[32m+[m[32m    background: green;[m
+[32m+[m[32m    color: white;[m
+[32m+[m[32m    text-decoration: none;[m
+[32m+[m[32m    border-radius: 6px;[m
+[32m+[m[32m}[m
+ </style>[m
+ </head>[m
+ [m
+[36m@@ -57,7 +85,7 @@[m [mbutton:hover {[m
+ <!-- IMAGE UPLOAD -->[m
+ <input type="file" id="imageInput" accept="image/*">[m
+ [m
+[31m-<!-- PACKAGE SELECTION -->[m
+[32m+[m[32m<!-- PACKAGE -->[m
+ <select id="package">[m
+     <option value="pkg1">4 pcs 2x2 + 8 pcs 1x1</option>[m
+     <option value="pkg2">2 pcs 2x2 + 12 pcs 1x1</option>[m
+[36m@@ -66,7 +94,7 @@[m [mbutton:hover {[m
+     <option value="pkg5">3 passport size only</option>[m
+ </select>[m
+ [m
+[31m-<!-- ATTIRE OPTION -->[m
+[32m+[m[32m<!-- ATTIRE -->[m
+ <select id="attire">[m
+     <option value="none">No Change</option>[m
+     <option value="formal">Formal Attire</option>[m
+[36m@@ -74,8 +102,8 @@[m [mbutton:hover {[m
+     <option value="casual">Casual</option>[m
+ </select>[m
+ [m
+[31m-<!-- PROCESS BUTTON -->[m
+[31m-<button onclick="uploadImage()">🚀 Process ID Photo</button>[m
+[32m+[m[32m<!-- BUTTON -->[m
+[32m+[m[32m<button id="btn" onclick="uploadImage()">🚀 Process ID Photo</button>[m
+ [m
+ <div id="result"></div>[m
+ [m
+[36m@@ -88,23 +116,26 @@[m [mconst API_URL = "https://YOUR-RENDER-APP.onrender.com/process";[m
+ [m
+ async function uploadImage() {[m
+ [m
+[31m-    let fileInput = document.getElementById("imageInput");[m
+[31m-    let packageType = document.getElementById("package").value;[m
+[31m-    let attireType = document.getElementById("attire").value;[m
+[31m-    let resultDiv = document.getElementById("result");[m
+[32m+[m[32m    const fileInput = document.getElementById("imageInput");[m
+[32m+[m[32m    const packageType = document.getElementById("package").value;[m
+[32m+[m[32m    const attireType = document.getElementById("attire").value;[m
+[32m+[m[32m    const resultDiv = document.getElementById("result");[m
+[32m+[m[32m    const btn = document.getElementById("btn");[m
+ [m
+     if (!fileInput.files[0]) {[m
+         alert("Please select an image first!");[m
+         return;[m
+     }[m
+ [m
+[32m+[m[32m    btn.disabled = true;[m
+[32m+[m[32m    btn.innerText = "Processing... ⏳";[m
+[32m+[m[32m    resultDiv.innerHTML = "";[m
+[32m+[m
+     let formData = new FormData();[m
+     formData.append("image", fileInput.files[0]);[m
+     formData.append("package", packageType);[m
+     formData.append("attire", attireType);[m
+ [m
+[31m-    resultDiv.innerHTML = "Processing... ⏳";[m
+[31m-[m
+     try {[m
+         let response = await fetch(API_URL, {[m
+             method: "POST",[m
+[36m@@ -119,24 +150,22 @@[m [masync function uploadImage() {[m
+         let url = URL.createObjectURL(blob);[m
+ [m
+         resultDiv.innerHTML = `[m
+[31m-            <h3>✅ Done!</h3>[m
+[31m-            <a href="${url}" download="id-photo.jpg">[m
+[31m-                Download Result[m
+[31m-            </a><br><br>[m
+[31m-            <img src="${url}" width="300">[m
+[32m+[m[32m            <h3>✅ Processing Complete</h3>[m
+[32m+[m[32m            <a class="download" href="${url}" download="id-photo.jpg">⬇ Download Image</a>[m
+[32m+[m[32m            <br>[m
+[32m+[m[32m            <img src="${url}">[m
+         `;[m
+ [m
+     } catch (error) {[m
+[31m-        resultDiv.innerHTML = "❌ Error processing image";[m
+[31m-        console.log(error);[m
+[32m+[m[32m        console.error(error);[m
+[32m+[m[32m        resultDiv.innerHTML = "❌ Error processing image. Check API or server.";[m
+[32m+[m[32m    } finally {[m
+[32m+[m[32m        btn.disabled = false;[m
+[32m+[m[32m        btn.innerText = "🚀 Process ID Photo";[m
+     }[m
+ }[m
+ [m
+ </script>[m
+ [m
+ </body>[m
+[31m-<<<<<<< HEAD[m
+[31m-</html>[m
+[31m-=======[m
+[31m-</html>[m
+[31m->>>>>>> b3ad0e22fc42087995bd691b712affe47ea0ceaa[m
+[32m+[m[32m</html>[m
+\ No newline at end of file[m

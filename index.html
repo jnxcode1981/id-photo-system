@@ -2,33 +2,38 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Auto ID Photo System</title>
 
 <style>
 body {
-    font-family: Arial;
+    font-family: Arial, sans-serif;
     text-align: center;
-    background: #f4f4f4;
+    background: linear-gradient(135deg, #f4f4f4, #e8f0ff);
     padding: 30px;
 }
 
 .container {
-    background: white;
-    padding: 20px;
-    max-width: 500px;
+    background: #fff;
+    padding: 25px;
+    max-width: 520px;
     margin: auto;
-    border-radius: 10px;
-    box-shadow: 0 0 10px #ccc;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
 }
 
 h2 {
     color: #333;
+    margin-bottom: 15px;
 }
 
 input, select, button {
-    width: 90%;
-    padding: 10px;
+    width: 92%;
+    padding: 12px;
     margin: 10px 0;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
 }
 
 button {
@@ -36,14 +41,37 @@ button {
     color: white;
     border: none;
     cursor: pointer;
+    font-weight: bold;
 }
 
 button:hover {
     background: #0056b3;
 }
 
+button:disabled {
+    background: #999;
+    cursor: not-allowed;
+}
+
 #result {
     margin-top: 20px;
+}
+
+img {
+    margin-top: 10px;
+    border-radius: 8px;
+    max-width: 100%;
+    border: 1px solid #ddd;
+}
+
+.download {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 15px;
+    background: green;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
 }
 </style>
 </head>
@@ -57,7 +85,7 @@ button:hover {
 <!-- IMAGE UPLOAD -->
 <input type="file" id="imageInput" accept="image/*">
 
-<!-- PACKAGE SELECTION -->
+<!-- PACKAGE -->
 <select id="package">
     <option value="pkg1">4 pcs 2x2 + 8 pcs 1x1</option>
     <option value="pkg2">2 pcs 2x2 + 12 pcs 1x1</option>
@@ -66,7 +94,7 @@ button:hover {
     <option value="pkg5">3 passport size only</option>
 </select>
 
-<!-- ATTIRE OPTION -->
+<!-- ATTIRE -->
 <select id="attire">
     <option value="none">No Change</option>
     <option value="formal">Formal Attire</option>
@@ -74,8 +102,8 @@ button:hover {
     <option value="casual">Casual</option>
 </select>
 
-<!-- PROCESS BUTTON -->
-<button onclick="uploadImage()">🚀 Process ID Photo</button>
+<!-- BUTTON -->
+<button id="btn" onclick="uploadImage()">🚀 Process ID Photo</button>
 
 <div id="result"></div>
 
@@ -88,22 +116,25 @@ const API_URL = "https://YOUR-RENDER-APP.onrender.com/process";
 
 async function uploadImage() {
 
-    let fileInput = document.getElementById("imageInput");
-    let packageType = document.getElementById("package").value;
-    let attireType = document.getElementById("attire").value;
-    let resultDiv = document.getElementById("result");
+    const fileInput = document.getElementById("imageInput");
+    const packageType = document.getElementById("package").value;
+    const attireType = document.getElementById("attire").value;
+    const resultDiv = document.getElementById("result");
+    const btn = document.getElementById("btn");
 
     if (!fileInput.files[0]) {
         alert("Please select an image first!");
         return;
     }
 
+    btn.disabled = true;
+    btn.innerText = "Processing... ⏳";
+    resultDiv.innerHTML = "";
+
     let formData = new FormData();
     formData.append("image", fileInput.files[0]);
     formData.append("package", packageType);
     formData.append("attire", attireType);
-
-    resultDiv.innerHTML = "Processing... ⏳";
 
     try {
         let response = await fetch(API_URL, {
@@ -119,24 +150,22 @@ async function uploadImage() {
         let url = URL.createObjectURL(blob);
 
         resultDiv.innerHTML = `
-            <h3>✅ Done!</h3>
-            <a href="${url}" download="id-photo.jpg">
-                Download Result
-            </a><br><br>
-            <img src="${url}" width="300">
+            <h3>✅ Processing Complete</h3>
+            <a class="download" href="${url}" download="id-photo.jpg">⬇ Download Image</a>
+            <br>
+            <img src="${url}">
         `;
 
     } catch (error) {
-        resultDiv.innerHTML = "❌ Error processing image";
-        console.log(error);
+        console.error(error);
+        resultDiv.innerHTML = "❌ Error processing image. Check API or server.";
+    } finally {
+        btn.disabled = false;
+        btn.innerText = "🚀 Process ID Photo";
     }
 }
 
 </script>
 
 </body>
-<<<<<<< HEAD
 </html>
-=======
-</html>
->>>>>>> b3ad0e22fc42087995bd691b712affe47ea0ceaa
