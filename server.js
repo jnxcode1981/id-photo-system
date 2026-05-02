@@ -6,36 +6,47 @@ const fs = require("fs");
 
 const app = express();
 
-// Middleware
+/*
+========================================
+MIDDLEWARE
+========================================
+*/
 app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// File upload config
+/*
+========================================
+UPLOAD CONFIG (RENDER SAFE)
+========================================
+Use /tmp (Render-compatible storage)
+*/
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, "uploads/");
+        cb(null, "/tmp");
     },
     filename: function (req, file, cb) {
-        cb(null, Date.now() + "-" + file.originalname);
+        const uniqueName = Date.now() + "-" + file.originalname;
+        cb(null, uniqueName);
     }
 });
 
 const upload = multer({ storage });
 
-// Ensure uploads folder exists
-if (!fs.existsSync("uploads")) {
-    fs.mkdirSync("uploads");
-}
-
-// Health check
+/*
+========================================
+HEALTH CHECK
+========================================
+*/
 app.get("/", (req, res) => {
     res.send("API is running 🚀");
 });
 
 /*
 ========================================
- MAIN PROCESS ENDPOINT
+MAIN PROCESS ENDPOINT
 ========================================
-Frontend sends:
+Receives:
 - image
 - package
 - attire
@@ -43,33 +54,31 @@ Frontend sends:
 app.post("/process", upload.single("image"), (req, res) => {
     try {
 
+        console.log("=== NEW REQUEST ===");
+        console.log("PACKAGE:", req.body.package);
+        console.log("ATTIRE:", req.body.attire);
+        console.log("FILE:", req.file);
+
         if (!req.file) {
             return res.status(400).send("No image uploaded");
         }
 
-        console.log("Received file:", req.file.filename);
-        console.log("Package:", req.body.package);
-        console.log("Attire:", req.body.attire);
+        const filePath = path.join("/tmp", req.file.filename);
 
-        /*
-        ========================================
-        TEMPORARY PROCESSING (SAFE VERSION)
-        ========================================
-        Right now we just return the SAME image back
-        (this avoids errors and makes frontend work)
-        */
+        // IMPORTANT: send processed file (currently raw image)
+        res.sendFile(filePath);
 
-        const imagePath = path.join(__dirname, req.file.path);
-
-        res.sendFile(imagePath);
-
-    } catch (error) {
-        console.log(error);
-        res.status(500).send("Processing error");
+    } catch (err) {
+        console.log("ERROR:", err);
+        res.status(500).send("Server error");
     }
 });
 
-// Port for Render
+/*
+========================================
+START SERVER
+========================================
+*/
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
