@@ -1,42 +1,77 @@
 const express = require("express");
 const cors = require("cors");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 
 const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: "10mb" }));
 
-// Test route
+// File upload config
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, "uploads/");
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + "-" + file.originalname);
+    }
+});
+
+const upload = multer({ storage });
+
+// Ensure uploads folder exists
+if (!fs.existsSync("uploads")) {
+    fs.mkdirSync("uploads");
+}
+
+// Health check
 app.get("/", (req, res) => {
-  res.send("API is running 🚀");
+    res.send("API is running 🚀");
 });
 
-// MAIN ENDPOINT
-app.post("/process", (req, res) => {
-  try {
-    const data = req.body;
+/*
+========================================
+ MAIN PROCESS ENDPOINT
+========================================
+Frontend sends:
+- image
+- package
+- attire
+*/
+app.post("/process", upload.single("image"), (req, res) => {
+    try {
 
-    // Example processing (you can modify this later)
-    const response = {
-      message: "Data received successfully",
-      receivedData: data,
-      status: "OK"
-    };
+        if (!req.file) {
+            return res.status(400).send("No image uploaded");
+        }
 
-    res.json(response);
+        console.log("Received file:", req.file.filename);
+        console.log("Package:", req.body.package);
+        console.log("Attire:", req.body.attire);
 
-  } catch (error) {
-    res.status(500).json({
-      message: "Error processing request",
-      error: error.message
-    });
-  }
+        /*
+        ========================================
+        TEMPORARY PROCESSING (SAFE VERSION)
+        ========================================
+        Right now we just return the SAME image back
+        (this avoids errors and makes frontend work)
+        */
+
+        const imagePath = path.join(__dirname, req.file.path);
+
+        res.sendFile(imagePath);
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Processing error");
+    }
 });
 
-// PORT for Render
+// Port for Render
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
