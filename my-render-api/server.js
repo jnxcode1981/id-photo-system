@@ -8,49 +8,62 @@ const app = express();
 
 app.use(cors());
 
-// Create uploads folder safely (Render-safe)
+// ALWAYS log requests
+app.use((req, res, next) => {
+    console.log("Request:", req.method, req.url);
+    next();
+});
+
+// Safe temp folder for Render
 const uploadPath = "/tmp/uploads";
 
 if (!fs.existsSync(uploadPath)) {
     fs.mkdirSync(uploadPath, { recursive: true });
 }
 
-// Multer config (Render-safe temp storage)
+// Multer config
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
+    destination: (req, file, cb) => {
+        console.log("Saving file to:", uploadPath);
         cb(null, uploadPath);
     },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + "-" + file.originalname);
+    filename: (req, file, cb) => {
+        const name = Date.now() + "-" + file.originalname;
+        console.log("Filename:", name);
+        cb(null, name);
     }
 });
 
 const upload = multer({ storage });
 
-// Test route
+// TEST ROUTE (VERY IMPORTANT)
 app.get("/", (req, res) => {
-    res.send("API is running 🚀");
+    res.send("API WORKING 🚀");
 });
 
-// PROCESS ROUTE
+// TEST UPLOAD ROUTE
 app.post("/process", upload.single("image"), (req, res) => {
     try {
+        console.log("BODY:", req.body);
+        console.log("FILE:", req.file);
+
         if (!req.file) {
-            return res.status(400).send("No image uploaded");
+            console.log("NO FILE RECEIVED");
+            return res.status(400).send("No file uploaded");
         }
 
-        console.log("File received:", req.file.filename);
+        console.log("FILE PATH:", req.file.path);
 
-        // Return the uploaded file back (safe test mode)
-        res.sendFile(req.file.path);
+        // Send file back
+        return res.sendFile(path.resolve(req.file.path));
 
     } catch (err) {
-        console.log("ERROR:", err);
-        res.status(500).send("Server processing error");
+        console.log("SERVER ERROR:", err);
+        return res.status(500).send("Server crash");
     }
 });
 
-// Render port
+// PORT
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
