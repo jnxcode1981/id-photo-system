@@ -6,13 +6,19 @@ const fs = require("fs");
 
 const app = express();
 
-// Middleware
 app.use(cors());
 
-// File upload config
+// Create uploads folder safely (Render-safe)
+const uploadPath = "/tmp/uploads";
+
+if (!fs.existsSync(uploadPath)) {
+    fs.mkdirSync(uploadPath, { recursive: true });
+}
+
+// Multer config (Render-safe temp storage)
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, "uploads/");
+        cb(null, uploadPath);
     },
     filename: function (req, file, cb) {
         cb(null, Date.now() + "-" + file.originalname);
@@ -21,57 +27,32 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// Ensure uploads folder exists
-if (!fs.existsSync("uploads")) {
-    fs.mkdirSync("uploads");
-}
-
-// Health check
+// Test route
 app.get("/", (req, res) => {
     res.send("API is running 🚀");
 });
 
-/*
-========================================
- MAIN PROCESS ENDPOINT
-========================================
-Frontend sends:
-- image
-- package
-- attire
-*/
+// PROCESS ROUTE
 app.post("/process", upload.single("image"), (req, res) => {
     try {
-
         if (!req.file) {
             return res.status(400).send("No image uploaded");
         }
 
-        console.log("Received file:", req.file.filename);
-        console.log("Package:", req.body.package);
-        console.log("Attire:", req.body.attire);
+        console.log("File received:", req.file.filename);
 
-        /*
-        ========================================
-        TEMPORARY PROCESSING (SAFE VERSION)
-        ========================================
-        Right now we just return the SAME image back
-        (this avoids errors and makes frontend work)
-        */
+        // Return the uploaded file back (safe test mode)
+        res.sendFile(req.file.path);
 
-        const imagePath = path.join(__dirname, req.file.path);
-
-        res.sendFile(imagePath);
-
-    } catch (error) {
-        console.log(error);
-        res.status(500).send("Processing error");
+    } catch (err) {
+        console.log("ERROR:", err);
+        res.status(500).send("Server processing error");
     }
 });
 
-// Port for Render
+// Render port
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log("Server running on port", PORT);
 });
